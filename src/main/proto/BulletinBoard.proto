@@ -1,0 +1,5 @@
+syntax = "proto3";
+package com.bulletinboard;
+option java_multiple_files = true;
+
+// Implement ProtoFile Here
