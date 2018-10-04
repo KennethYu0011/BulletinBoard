@@ -1,10 +1,17 @@
 package com.bulletinboard;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import io.grpc.stub.StreamObserver;
 
 public class BulletinBoardService extends BulletinBoardGrpc.BulletinBoardImplBase{
+
+	private PostList plist;
+
+	public BulletinBoardService() {
+	    plist = new PostList();
+    }
 
 	@Override
 	public void processMessage(messageRequest request, StreamObserver<messageResponse> responseObserver) 
@@ -26,15 +33,18 @@ public class BulletinBoardService extends BulletinBoardGrpc.BulletinBoardImplBas
 
 	@Override
 	public void printRequest(messagePost post, StreamObserver<messageResponse> responseObserver) {
-		String title = post.getTitle();
-		String message = post.getMessage();
+		Post dataPost = new Post();
+		dataPost.setTitle(post.getTitle());
+		dataPost.setMessage(post.getMessage());
 
-		System.out.print("Received post:");
-		System.out.println();
-		System.out.print("Title: " + title);
-		System.out.println();
-		System.out.print("Post: " + message);
-		System.out.println();
+		plist.addPost(dataPost);
+
+		System.out.println("Received post, list of all posts is:");
+        Enumeration<String> e = plist.getTitles();
+
+        while (e.hasMoreElements())
+            System.out.println(e.nextElement());
+
 
 		messageResponse res = messageResponse.newBuilder().addMessage("Received post, thank you.").build();
 

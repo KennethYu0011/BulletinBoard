@@ -16,6 +16,11 @@ public class BulletinBoardClient {
 		post.setMessage("Hello server! I am writing on you!");
 
 		sendPost(post, stub);
+
+		post.setTitle("Java Title");
+		post.setMessage("This is a second message.");
+
+		sendPost(post, stub);
 	}
 
 	static void sendPost(Post post, BulletinBoardBlockingStub stub) {
