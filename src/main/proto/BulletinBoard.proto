@@ -12,6 +12,12 @@ message messageResponse{
 	repeated string message = 1;
 }
 
+message messagePost {
+    string title = 1;
+    string message = 2;
+}
+
 service BulletinBoard{
 	rpc processMessage(messageRequest) returns (messageResponse);
+    rpc printRequest(messagePost) returns (messageResponse);
 }

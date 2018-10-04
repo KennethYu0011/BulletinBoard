@@ -10,12 +10,26 @@ public class BulletinBoardClient {
 		// TODO Auto-generated method stub
 		ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 5000).usePlaintext().build();
 		BulletinBoardBlockingStub stub = BulletinBoardGrpc.newBlockingStub(channel);
-		messageRequest req = messageRequest.newBuilder().setMessage("Hello world!").build();
-		
-		messageResponse res = stub.processMessage(req);
-		
-		for(int i = 0; i<res.getMessageCount();i++)
-			System.out.println(res.getMessage(i));
+
+		Post post = new Post();
+		post.setTitle("Introductory Title");
+		post.setMessage("Hello server! I am writing on you!");
+
+		sendPost(post, stub);
 	}
+
+	static void sendPost(Post post, BulletinBoardBlockingStub stub) {
+	    messagePost tempPost;
+
+	    tempPost = messagePost.newBuilder()
+                .setTitle(post.getTitle())
+                .setMessage(post.getMessage())
+                .build();
+
+	    messageResponse res = stub.printRequest(tempPost);
+
+	    for(int i = 0; i<res.getMessageCount();i++)
+			System.out.println(res.getMessage(i));
+    }
 
 }
