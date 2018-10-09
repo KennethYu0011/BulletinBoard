@@ -4,6 +4,9 @@ option java_multiple_files = true;
 
 // Implement ProtoFile Here
 
+message empty {
+}
+
 message messageRequest{
 	string message = 1;
 }
@@ -12,12 +15,24 @@ message messageResponse{
 	repeated string message = 1;
 }
 
+message messagePostTitle{
+    string title = 1;
+}
+
 message messagePost {
     string title = 1;
     string message = 2;
 }
 
+message messagePostFromServer {
+    string title = 1;
+    string message = 2;
+    bool success = 3;
+}
+
 service BulletinBoard{
-	rpc processMessage(messageRequest) returns (messageResponse);
-    rpc printRequest(messagePost) returns (messageResponse);
+    rpc getTitles (empty) returns (messageResponse);
+    rpc postMessage (messagePost) returns (messageResponse);
+    rpc deletePost (messagePostTitle) returns (messageResponse);
+    rpc getMessagePost (messagePostTitle) returns (messagePostFromServer);
 }

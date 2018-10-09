@@ -23,4 +23,17 @@ public class Post {
         this.title = title;
     }
 
+    public String toString() {
+        return (this.title + "\n\n" + this.message);
+    }
+
+    public static Post buildPostFromServer(messagePostFromServer post) {
+        Post temp = new Post();
+
+        temp.setTitle(post.getTitle());
+        temp.setMessage(post.getMessage());
+
+        return temp;
+    }
+
 }
