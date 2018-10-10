@@ -1,5 +1,6 @@
 package com.bulletinboard;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
@@ -11,6 +12,7 @@ public class BulletinBoardService extends BulletinBoardGrpc.BulletinBoardImplBas
 
 	public BulletinBoardService() {
 	    plist = new PostList();
+	    readInData();
     }
 
 	@Override
@@ -36,6 +38,7 @@ public class BulletinBoardService extends BulletinBoardGrpc.BulletinBoardImplBas
 		dataPost.setMessage(post.getMessage());
 
 		plist.addPost(dataPost);
+		writeBackup();
 
 		System.out.println("[Post Message]: " + post.getTitle());
 
@@ -51,6 +54,7 @@ public class BulletinBoardService extends BulletinBoardGrpc.BulletinBoardImplBas
         String key = title.getTitle();
         messageSuccess res;
         if(plist.removePost(key)) {
+            writeBackup();
             System.out.println("[Post Delete]: " + key);
             res = messageSuccess.newBuilder().setSuccess(true).build();
         }
@@ -86,5 +90,35 @@ public class BulletinBoardService extends BulletinBoardGrpc.BulletinBoardImplBas
 
         responseObserver.onNext(res);
         responseObserver.onCompleted();
+    }
+
+    public boolean writeBackup() {
+	    try {
+            FileOutputStream fout = new FileOutputStream(new File("data.txt"));
+            ObjectOutputStream oout = new ObjectOutputStream(fout);
+
+            oout.writeObject(plist);
+
+            oout.close();
+        } catch (Exception e) {
+	        return false;
+        }
+
+        return true;
+    }
+
+    public boolean readInData() {
+        try {
+            FileInputStream fin = new FileInputStream(new File("data.txt"));
+            ObjectInputStream oin = new ObjectInputStream(fin);
+
+            this.plist = (PostList) oin.readObject();
+
+            oin.close();
+        } catch (Exception e) {
+            return false;
+        }
+
+        return true;
     }
 }

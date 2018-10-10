@@ -1,10 +1,11 @@
 package com.bulletinboard;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-public class PostList {
+public class PostList implements Serializable {
 
     private Hashtable<String, Post> plist;
 
