@@ -7,6 +7,11 @@ public class Post {
 
     public Post() { }
 
+    public Post(String title, String message) {
+        this.title = title;
+        this.message = message;
+    }
+
     public String getMessage() {
         return message;
     }

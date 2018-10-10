@@ -27,6 +27,14 @@ public class PostList {
             return true;
     }
 
+    public void printTitles() {
+        Enumeration<String> titles = getTitles();
+
+        while (titles.hasMoreElements()) {
+            System.out.println(titles.nextElement());
+        }
+    }
+
     public Enumeration<String> getTitles(){
         return plist.keys();
     }

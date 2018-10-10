@@ -8,54 +8,78 @@ import java.util.ArrayList;
 
 public class BulletinBoardClient {
 
+    ManagedChannel channel;
+    BulletinBoardBlockingStub stub;
+
+    BulletinBoardClient() {
+        channel = ManagedChannelBuilder.forAddress("localhost", 5000).usePlaintext().build();
+        stub = BulletinBoardGrpc.newBlockingStub(channel);
+    }
+
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 5000).usePlaintext().build();
-		BulletinBoardBlockingStub stub = BulletinBoardGrpc.newBlockingStub(channel);
+        BulletinBoardClient bc = new BulletinBoardClient();
 
-		Post post = new Post();
-		post.setTitle("Introductory Title");
-		post.setMessage("Hello server! I am writing on you!");
+        try {
+		    String title = "Introductory Title";
+    		String message = "Hello server! I am writing on you!";
+    		Post post = new Post(title, message);
 
-		sendPost(post, stub);
+    		bc.sendPost(post);
 
-		post.setTitle("Java Title");
-		post.setMessage("This is a second message.");
+    		title = "Java Title";
+    		message = "This is a second message.";
+    		post = new Post(title, message);
 
-		sendPost(post, stub);
+    		bc.sendPost(post);
 
-		printAllPostTitles(stub);
+    		ArrayList<String> list = bc.getAllPostTitles();
+    		System.out.println(list);
 
-        messagePostTitle title1 = messagePostTitle.newBuilder()
-                                .setTitle("Introductory Title")
-                                .build();
+    		if (bc.deletePost("Introductory Title"))
+    		    System.out.println("Successful deletion.");
+    		else
+    		    System.out.println("Unsuccessful deletion.");
 
-        messagePostTitle title2 = messagePostTitle.newBuilder()
-                               .setTitle("This one should fail!")
-                               .build();
+    		if (bc.deletePost("This one should fail!"))
+    		    System.out.println("Successful deletion.");
+    		else
+    		    System.out.println("Unsuccessful deletion.");
 
-        messageResponse resp = stub.deletePost(title2);
-        for(int i = 0; i<resp.getMessageCount();i++)
-            System.out.println(resp.getMessage(i));
+    		list = bc.getAllPostTitles();
+    		System.out.println(list);
 
-        printAllPostTitles(stub);
+            post = bc.getPost("Java Title");
 
+       		if (post != null)
+		        System.out.println("Returned from server:\n" + post);
+		    else
+		        System.out.println("Introductory Title Does Not Exist");
 
-        messagePostFromServer requestedPost;
-
-        requestedPost = stub.getMessagePost(title2);
-
-        if(requestedPost.getSuccess()){
-            Post tempPost = Post.buildPostFromServer(requestedPost);
-            System.out.println(tempPost);
-        }else{
-            System.out.println("Message was not found, sorry.");
+        } catch (StatusRuntimeException e) {
+		    System.out.println("Communication Failed: Server Down?");
         }
-
-
 	}
 
-	static void sendPost(Post post, BulletinBoardBlockingStub stub) {
+	// Will return a Post if the message attached to title exists, otherwise it will return null.
+	Post getPost(String title) throws StatusRuntimeException {
+	    messagePostTitle mpTitle;
+
+	    mpTitle = messagePostTitle.newBuilder()
+                  .setTitle(title)
+                  .build();
+
+	    messagePostFromServer mpPost;
+
+        mpPost = stub.getMessagePost(mpTitle);
+
+	    if (!mpPost.getSuccess())
+	        return null;
+	    else {
+	        return new Post(mpPost.getTitle(), mpPost.getMessage());
+        }
+    }
+
+	boolean sendPost(Post post) throws StatusRuntimeException {
 	    messagePost tempPost;
 
 	    tempPost = messagePost.newBuilder()
@@ -63,21 +87,32 @@ public class BulletinBoardClient {
                 .setMessage(post.getMessage())
                 .build();
 
-	    messageResponse res = stub.postMessage(tempPost);
+	    messageSuccess res = stub.postMessage(tempPost);
 
-	    for(int i = 0; i<res.getMessageCount();i++)
-			System.out.println(res.getMessage(i));
+	    return res.getSuccess();
     }
 
-    static void printAllPostTitles(BulletinBoardBlockingStub stub) {
-	    System.out.println("Printing all Titles\n-------------------");
+    ArrayList<String> getAllPostTitles() throws StatusRuntimeException {
         empty emp;
         emp = empty.newBuilder().build();
         messageResponse titles = stub.getTitles(emp);
-        for (int i = 0; i < titles.getMessageCount(); i++)
-            System.out.println(titles.getMessage(i));
 
-        System.out.println();
+        ArrayList<String> list = new ArrayList<String>();
+
+        for (int i = 0; i < titles.getMessageCount(); i++)
+            list.add(titles.getMessage(i));
+
+        return list;
+    }
+
+    boolean deletePost(String title) throws StatusRuntimeException {
+        messagePostTitle to_delete = messagePostTitle.newBuilder()
+                                   .setTitle(title)
+                                   .build();
+
+        messageSuccess resp = stub.deletePost(to_delete);
+
+        return resp.getSuccess();
     }
 
 }

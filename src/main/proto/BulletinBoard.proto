@@ -30,9 +30,13 @@ message messagePostFromServer {
     bool success = 3;
 }
 
+message messageSuccess {
+    bool success = 1;
+}
+
 service BulletinBoard{
     rpc getTitles (empty) returns (messageResponse);
-    rpc postMessage (messagePost) returns (messageResponse);
-    rpc deletePost (messagePostTitle) returns (messageResponse);
+    rpc postMessage (messagePost) returns (messageSuccess);
+    rpc deletePost (messagePostTitle) returns (messageSuccess);
     rpc getMessagePost (messagePostTitle) returns (messagePostFromServer);
 }

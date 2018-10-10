@@ -16,6 +16,7 @@ public class BulletinBoardService extends BulletinBoardGrpc.BulletinBoardImplBas
 	@Override
 	public void getTitles(empty emp, StreamObserver<messageResponse> responseObserver)
 	{
+	    System.out.println("[Get All Posts]");
 		ArrayList<String> titles = new ArrayList<String>();
 		Enumeration<String> e = plist.getTitles();
 
@@ -29,32 +30,33 @@ public class BulletinBoardService extends BulletinBoardGrpc.BulletinBoardImplBas
 	}
 
 	@Override
-	public void postMessage(messagePost post, StreamObserver<messageResponse> responseObserver) {
+	public void postMessage(messagePost post, StreamObserver<messageSuccess> responseObserver) {
 		Post dataPost = new Post();
 		dataPost.setTitle(post.getTitle());
 		dataPost.setMessage(post.getMessage());
 
 		plist.addPost(dataPost);
 
-		System.out.println("Received post: " + post.getTitle());
+		System.out.println("[Post Message]: " + post.getTitle());
 
-		messageResponse res = messageResponse.newBuilder().addMessage("Received post, thank you.").build();
+		messageSuccess res = messageSuccess.newBuilder().setSuccess(true).build();
 
 		responseObserver.onNext(res);
 		responseObserver.onCompleted();
 	}
 
     @Override
-    public void deletePost(messagePostTitle title, StreamObserver<messageResponse> responseObserver) {
+    public void deletePost(messagePostTitle title, StreamObserver<messageSuccess> responseObserver) {
 
         String key = title.getTitle();
-        messageResponse res;
+        messageSuccess res;
         if(plist.removePost(key)) {
-            System.out.println("Post deleted: " + key);
-            res = messageResponse.newBuilder().addMessage("Deleted post, thank you.").build();
-        }else {
-            System.out.println("Post not found");
-            res = messageResponse.newBuilder().addMessage("Post not found, sorry.").build();
+            System.out.println("[Post Delete]: " + key);
+            res = messageSuccess.newBuilder().setSuccess(true).build();
+        }
+        else {
+            System.out.println("[Post Delete]: Failed - " + key);
+            res = messageSuccess.newBuilder().setSuccess(false).build();
         }
 
         responseObserver.onNext(res);
@@ -69,11 +71,13 @@ public class BulletinBoardService extends BulletinBoardGrpc.BulletinBoardImplBas
         Post post = plist.getPost(key);
 
         if(post == null){
+            System.out.println("[Post Retrieved]: Failed - " + key);
             res = messagePostFromServer.newBuilder()
                     .setTitle("")
                     .setMessage("")
                     .setSuccess(false).build();
         }else {
+            System.out.println("[Post Retrieved]: " + key);
             res = messagePostFromServer.newBuilder()
                     .setTitle(post.getTitle())
                     .setMessage(post.getMessage())
