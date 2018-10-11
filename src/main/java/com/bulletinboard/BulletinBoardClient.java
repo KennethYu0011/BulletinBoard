@@ -60,7 +60,12 @@ public class BulletinBoardClient {
         }
 	}
 
-	// Will return a Post if the message attached to title exists, otherwise it will return null.
+	/**
+	* Attempt to retrieve a post from the server with the given title.
+	* @param title The title of the target post.
+	* @exception StatusRuntimeException Occurs when server is down or message lost.
+	* @return Post Return a Post if successful, null otherwise.
+	*/
 	Post getPost(String title) throws StatusRuntimeException {
 	    messagePostTitle mpTitle;
 
@@ -79,6 +84,12 @@ public class BulletinBoardClient {
         }
     }
 
+	/**
+	* Attempt to place a post on the server.
+	* @param post The Post object that is to be placed on the server.
+	* @exception StatusRuntimeException Occurs when server is down or message lost.
+	* @return boolean States whether the post was successful placed on the server.
+	*/
 	boolean sendPost(Post post) throws StatusRuntimeException {
 	    messagePost tempPost;
 
@@ -92,6 +103,11 @@ public class BulletinBoardClient {
 	    return res.getSuccess();
     }
 
+	/**
+	* Get the list of titles for all Post objects stored on the server.
+	* @exception StatusRuntimeException Occurs when server is down or message lost.
+	* @return ArrayList<String> An ArrayList containing all titles for posts on the server.
+	*/
     ArrayList<String> getAllPostTitles() throws StatusRuntimeException {
         empty emp;
         emp = empty.newBuilder().build();
@@ -105,6 +121,12 @@ public class BulletinBoardClient {
         return list;
     }
 
+	/**
+	* Delete a Post of the given title on the server.
+	* @param title The title of the Post that will be targeted and deleted.
+	* @exception StatusRuntimeException Occurs when server is down or message lost.
+	* @return boolean States whether the deletion was succesfully completed on server.
+	*/
     boolean deletePost(String title) throws StatusRuntimeException {
         messagePostTitle to_delete = messagePostTitle.newBuilder()
                                    .setTitle(title)
