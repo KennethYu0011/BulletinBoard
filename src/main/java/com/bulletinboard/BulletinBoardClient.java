@@ -5,6 +5,9 @@ import com.bulletinboard.BulletinBoardGrpc.BulletinBoardBlockingStub;
 import io.grpc.*;
 
 import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BulletinBoardClient {
 
@@ -17,8 +20,12 @@ public class BulletinBoardClient {
     }
 
 	public static void main(String[] args) {
-        BulletinBoardClient bc = new BulletinBoardClient();
 
+        BulletinBoardClient bc = new BulletinBoardClient();
+        bc.runInputLoop();
+
+
+/*
         try {
 		    String title = "Introductory Title";
     		String message = "Hello server! I am writing on you!";
@@ -58,6 +65,121 @@ public class BulletinBoardClient {
         } catch (StatusRuntimeException e) {
 		    System.out.println("Communication Failed: Server Down?");
         }
+
+        */
+	}
+
+	public void runInputLoop(){
+		Scanner sc = new Scanner(System.in);
+		/*
+		String str = "\"hello\"   \"world! does not matter\"";
+		//String quoteMatch = "\"([^\"]*)\"";
+		String quoteMatch ="[\\s]* |\"([^\"]*)\"";
+		Pattern p = Pattern.compile(quoteMatch);
+
+		Matcher m = p.matcher(str);
+
+		while (m.find())
+			System.out.println("Str: "+m.group(1));
+			*/
+
+		//System.out.println(getArgs("list"));
+
+    	while(true){
+    		System.out.println("Input a command (enter \"exit\" to quit): ");
+			String line = sc.nextLine();
+			if (line.length() == 0) {
+				break;
+			}
+			ArrayList<String> args = getArgs(line);
+
+			if( args.get(0).compareTo("post") == 0 ){
+				parsePost(args);
+			}else if(args.get(0).compareTo("get") == 0 ){
+				parseGet(args);
+			}else if(args.get(0).compareTo("delete") == 0 ){
+				parseDelete(args);
+			}else if(args.get(0).compareTo("list") == 0 ){
+				parseList();
+			}else if (args.get(0).compareTo("exit") == 0) {
+				break;
+			}else{
+				System.out.println("Command not known, please try again.");
+			}
+		}
+
+		sc.close();
+	}
+
+	public ArrayList<String> getArgs(String line){
+		ArrayList<String> res = new ArrayList<String>();
+
+		// Get the REST call.
+		int firstSpaceIndex = line.indexOf(" ");
+		if(firstSpaceIndex == -1) {
+			res.add(line);
+			return res;
+		}
+
+		res.add(line.substring(0, firstSpaceIndex));
+		line = line.substring(firstSpaceIndex);
+
+		// Get the two arguments for any REST call.
+		String quoteMatch ="[\\s]* |\"([^\"]*)\"";
+		Pattern p = Pattern.compile(quoteMatch);
+
+		Matcher m = p.matcher(line);
+
+		String temp;
+		while (m.find()) {
+			temp = m.group(1);
+			if (temp != null) res.add(temp);
+		}
+    	return res;
+	}
+
+	public void parsePost(ArrayList<String> args){
+    	if (args.size()!= 3) return;
+    	Post newPost = new Post(args.get(1),args.get(2));
+
+    	try {
+			if (!sendPost(newPost))
+				System.out.println("Title already exists, must be unique.");
+		} catch (StatusRuntimeException e) {
+    		System.out.println("Connection failure.");
+		}
+
+
+	}
+
+	public void parseGet(ArrayList<String> args){
+    	Post post = getPost(args.get(1));
+
+    	try {
+			System.out.println(post.getMessage());
+		} catch (StatusRuntimeException e) {
+    		System.out.println("Connection failure.");
+		}
+	}
+
+	public void parseDelete(ArrayList<String> args){
+    	try {
+			if (!deletePost(args.get(1)))
+				System.out.println("Title not found, please try again.");
+		} catch (StatusRuntimeException e) {
+    		System.out.println("Connection failure.");
+		}
+	}
+
+	public void parseList(){
+    	try {
+			ArrayList<String> alist = getAllPostTitles();
+			System.out.println("Titles\n------");
+			for (String str : alist)
+				System.out.println(str);
+		} catch (StatusRuntimeException e) {
+    		System.out.println("Connection failure.");
+		}
 	}
 
 	/**
