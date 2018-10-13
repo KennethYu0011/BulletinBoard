@@ -12,7 +12,7 @@ public class BulletinBoardServer {
 		Server server = ServerBuilder.forPort(5000).addService(new BulletinBoardService()).build();
 		
 		server.start();
-		System.out.println("Server!");
+		System.out.println("Server online. Listening on port 5000.\n");
 		
 		server.awaitTermination();
 
