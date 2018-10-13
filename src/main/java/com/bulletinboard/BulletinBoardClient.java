@@ -33,9 +33,9 @@ public class BulletinBoardClient {
 		Scanner sc = new Scanner(System.in);
 
 		System.out.println("Enter any of the following commands to interact with the bulletin board:");
-		System.out.println("\tpost   <title> <body>");
-		System.out.println("\tget    <title>");
-		System.out.println("\tdelete <title>");
+		System.out.println("\tpost   \"title\" \"body\"");
+		System.out.println("\tget    \"title\"");
+		System.out.println("\tdelete \"title\"");
 		System.out.println("\tlist");
 		System.out.println("\texit");
 		System.out.println("------------------------------------------------------------------------");
@@ -99,7 +99,10 @@ public class BulletinBoardClient {
 	}
 
 	private void parsePost(ArrayList<String> args){
-    	if (args.size()!= 3) return;
+    	if (args.size()!= 3) {
+			System.out.println("Illegal arguments. Please try again.");
+			return;
+		}
     	Post newPost = new Post(args.get(1),args.get(2));
 
     	try {
@@ -113,7 +116,15 @@ public class BulletinBoardClient {
 	}
 
 	private void parseGet(ArrayList<String> args){
+    	if (args.size() != 2 ) {
+    		System.out.println("Illegal arguments. Please try again!");
+    		return;
+		}
     	Post post = getPost(args.get(1));
+		if(post == null) {
+			System.out.println("Title not found, please try again.");
+			return;
+		}
 
     	try {
 			System.out.println(post.getMessage());
@@ -123,6 +134,11 @@ public class BulletinBoardClient {
 	}
 
 	private void parseDelete(ArrayList<String> args){
+		if (args.size() != 2 ) {
+			System.out.println("Illegal arguments. Please try again!");
+			return;
+		}
+
     	try {
 			if (!deletePost(args.get(1)))
 				System.out.println("Title not found, please try again.");

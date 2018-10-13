@@ -10,9 +10,9 @@ public class BulletinBoardServer {
 		// TODO Auto-generated method stub
 		
 		Server server = ServerBuilder.forPort(5000).addService(new BulletinBoardService()).build();
-		
-		server.start();
+
 		System.out.println("Server online. Listening on port 5000.\n");
+		server.start();
 		
 		server.awaitTermination();
 
